@@ -5,6 +5,7 @@ import { v4 as uuidV4 } from "uuid"; // to create unique ids for the events
 import { Calendar, momentLocalizer, View } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import withDragAndDrop, {
   EventInteractionArgs,
 } from "react-big-calendar/lib/addons/dragAndDrop";
@@ -29,7 +30,7 @@ const initialEvents = [
     title: "test",
     location: "none",
     start: new Date(),
-    end: new Date(Date.now() + 20000),
+    end: new Date(Date.now() + 200000),
   },
 ];
 
@@ -85,8 +86,7 @@ const DndCalendar = () => {
         : [...prev, newEvent]
     );
 
-
-    setOpenForm(false); // close the form modal 
+    setOpenForm(false); // close the form modal
     setSelectedEvent(null);
     setIsEditing(false);
   };
@@ -100,9 +100,38 @@ const DndCalendar = () => {
     setOpenForm(open);
   };
 
-
   //function to edit the time for the events on dragging the event in the calendar
   const handleEventDrop = ({
+    event,
+    start,
+  }: // end,
+  EventInteractionArgs<Event>) => {
+    const eventDuration = event.end.getTime() - event.start.getTime();
+    const updatedEvent: Event = {
+      ...event,
+      start: new Date(start),
+      end: new Date(new Date(start).getTime() + eventDuration),
+    };
+
+    //update the event array with updated event time.
+    setEvents((prev) =>
+      prev.map((e) => (e.id === event.id ? updatedEvent : e))
+    );
+  };
+
+  //function to preset the form on clicking a event and open the modal
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsEditing(true);
+    setOpenForm(true);
+  };
+
+  //to handle the change in the view of calendar to month,week or agenda
+  const handleViewChange = (newView: View) => {
+    setView(newView);
+  };
+
+  const handleEventResize = ({
     event,
     start,
     end,
@@ -117,18 +146,6 @@ const DndCalendar = () => {
     setEvents((prev) =>
       prev.map((e) => (e.id === event.id ? updatedEvent : e))
     );
-  };
-
-  //function to preset the form on clicking a event and open the modal 
-  const handleEventClick = (event: Event) => {
-    setSelectedEvent(event);
-    setIsEditing(true);
-    setOpenForm(true);
-  };
-
-  //to handle the change in the view of calendar to month,week or agenda
-  const handleViewChange = (newView: View) => {
-    setView(newView);
   };
 
   return (
@@ -147,6 +164,8 @@ const DndCalendar = () => {
         onSelectSlot={handleSelectSlot}
         onEventDrop={handleEventDrop}
         onSelectEvent={handleEventClick}
+        resizable={true}
+        onEventResize={handleEventResize}
       />
       {/* form modal to add delete or edit events  */}
       <NewEventModal

@@ -48,6 +48,7 @@ const NewEventModal = ({
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [hasError, setHasError] = useState(false); // to flag if there is error on submission
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     // preset the data if an event is selected
@@ -68,13 +69,34 @@ const NewEventModal = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setHasError(false);
+    setErrorMessage("");
     const formData = new FormData(e.currentTarget);
     const title = formData.get("title") as string;
     const location = formData.get("location") as string;
 
+    console.log(endDate, "enddate\n", startDate, "startdate");
     //check for errors in the submitted form
     if (!title || !location || !startDate || !endDate) {
+      console.log("s");
+
       setHasError(true);
+      setErrorMessage(
+        "Please make sure you have entered all the required fields"
+      );
+      return;
+    }
+
+    if (startDate && endDate && startDate.getTime() === endDate.getTime()) {
+      setHasError(true);
+      setErrorMessage("Start and end time cannot be the same.");
+      return;
+    }
+
+    if (endDate < startDate) {
+      console.log("date");
+
+      setHasError(true);
+      setErrorMessage("End date cannot be before the start date!");
       return;
     }
 
@@ -87,6 +109,8 @@ const NewEventModal = ({
 
     onSubmit(eventData); // Pass the form data back to parent component
     openChangeFn(false); // Close modal after submission
+    setHasError(false);
+    setErrorMessage("");
   };
 
   // function to handle date changes
@@ -98,8 +122,16 @@ const NewEventModal = ({
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    openChangeFn(open);
+    setHasError(false);
+    setErrorMessage("");
+    setStartDate(null);
+    setEndDate(null);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={openChangeFn}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader className="mb-2">
@@ -131,9 +163,7 @@ const NewEventModal = ({
           {hasError && (
             <Alert variant={"destructive"}>
               <AlertTitle>Error!</AlertTitle>
-              <AlertDescription>
-                Please make sure you have entered all the required fields
-              </AlertDescription>
+              <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
           <DialogFooter className="mt-5 gap-y-2">
