@@ -12,6 +12,7 @@ import {
 import DeleteModal from "./DeleteModal";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { DialogClose } from "@radix-ui/react-dialog";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 type NewEventProps = {
   open: boolean;
@@ -74,11 +75,8 @@ const NewEventModal = ({
     const title = formData.get("title") as string;
     const location = formData.get("location") as string;
 
-    console.log(endDate, "enddate\n", startDate, "startdate");
     //check for errors in the submitted form
     if (!title || !location || !startDate || !endDate) {
-      console.log("s");
-
       setHasError(true);
       setErrorMessage(
         "Please make sure you have entered all the required fields"
@@ -86,15 +84,15 @@ const NewEventModal = ({
       return;
     }
 
+    // check if end date and start date are same if they are show error
     if (startDate && endDate && startDate.getTime() === endDate.getTime()) {
       setHasError(true);
       setErrorMessage("Start and end time cannot be the same.");
       return;
     }
 
+    // check if end time is before start time
     if (endDate < startDate) {
-      console.log("date");
-
       setHasError(true);
       setErrorMessage("End date cannot be before the start date!");
       return;
@@ -124,6 +122,7 @@ const NewEventModal = ({
 
   const handleOpenChange = (open: boolean) => {
     openChangeFn(open);
+    // reset error and date field
     setHasError(false);
     setErrorMessage("");
     setStartDate(null);
@@ -161,7 +160,8 @@ const NewEventModal = ({
           </div>
           {/* show error in alert box if there is any error on submission  */}
           {hasError && (
-            <Alert variant={"destructive"}>
+            <Alert className="" variant={"destructive"}>
+              <ExclamationTriangleIcon className="h-5 w-5 mt-1" />
               <AlertTitle>Error!</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
