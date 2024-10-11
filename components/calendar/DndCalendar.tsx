@@ -148,6 +148,12 @@ const DndCalendar = () => {
     );
   };
 
+  // to go to week view if +2 more or +3 more are clicked
+  const handleDrillDown = (date: Date) => {
+    setView("week"); // Switch to week view
+    setCurrentDate(date); // Navigate to the selected date
+  };
+
   return (
     <div>
       <NewEventButton onClick={setOpenForm} />
@@ -166,6 +172,7 @@ const DndCalendar = () => {
         onSelectEvent={handleEventClick}
         resizable={true}
         onEventResize={handleEventResize}
+        onDrillDown={handleDrillDown}
       />
       {/* form modal to add delete or edit events  */}
       <NewEventModal
